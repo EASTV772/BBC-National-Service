@@ -21,6 +21,11 @@ html, body {
     align-items: center;
 }
 
+
+/* =========================
+   EDITOR
+========================= */
+
 .editor {
     position: absolute;
     top: 20px;
@@ -32,6 +37,7 @@ html, body {
     border-radius: 8px;
     border: 1px solid #444;
     color: white;
+    box-sizing: content-box;
 }
 
 .editor h2 {
@@ -86,9 +92,19 @@ html, body {
     letter-spacing: 0;
 }
 
+
+/* =========================
+   HIDDEN VIDEO
+========================= */
+
 #v {
     display: none;
 }
+
+
+/* =========================
+   TV FRAME
+========================= */
 
 .frame {
     width: min(100vw, calc(100vh * 4 / 3));
@@ -101,14 +117,73 @@ canvas {
     width: 100%;
     height: 100%;
     background: #000;
+    display: block;
+}
+
+
+/* =========================
+   MOBILE LAYOUT
+========================= */
+
+@media (max-width: 600px) {
+
+    html,
+    body {
+        display: block;
+        width: 100%;
+        height: auto;
+        min-height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+
+    /* Broadcast first */
+
+    .frame {
+        width: 100vw;
+        height: auto;
+        aspect-ratio: 4 / 3;
+        margin: 0;
+    }
+
+    canvas {
+        width: 100vw;
+        height: auto;
+        display: block;
+    }
+
+
+    /* Editor moves underneath broadcast */
+
+    .editor {
+        position: relative;
+        top: auto;
+        left: auto;
+
+        width: calc(100% - 30px);
+
+        margin: 15px auto 30px auto;
+
+        box-sizing: border-box;
+
+        z-index: 10;
+
+        border-radius: 8px;
+    }
+
 }
 
 </style>
 </head>
 
+
 <body>
 
-<!-- HIDDEN VIDEO -->
+
+<!-- =========================
+     HIDDEN VIDEO
+========================= -->
 
 <video
     id="v"
@@ -120,7 +195,9 @@ canvas {
 </video>
 
 
-<!-- BACKGROUND MUSIC -->
+<!-- =========================
+     BACKGROUND MUSIC
+========================= -->
 
 <audio
     id="music"
@@ -129,11 +206,14 @@ canvas {
 </audio>
 
 
-<!-- EDITOR -->
+<!-- =========================
+     EDITOR
+========================= -->
 
 <div class="editor">
 
     <h2>BBC National Service Editor</h2>
+
 
     <label>Date</label>
 
@@ -256,7 +336,9 @@ BUTTON.</textarea>
 </div>
 
 
-<!-- TV SCREEN -->
+<!-- =========================
+     TV SCREEN
+========================= -->
 
 <div class="frame">
 
@@ -271,8 +353,16 @@ BUTTON.</textarea>
 
 <script>
 
-const canvas = document.getElementById("c");
-const ctx = canvas.getContext("2d");
+
+/* =========================
+   CANVAS
+========================= */
+
+const canvas =
+    document.getElementById("c");
+
+const ctx =
+    canvas.getContext("2d");
 
 const W = 1440;
 const H = 1080;
@@ -280,44 +370,64 @@ const H = 1080;
 const contentX = 125;
 
 
-/* VIDEO */
+/* =========================
+   VIDEO
+========================= */
 
-const video = document.getElementById("v");
-
-
-/* MUSIC */
-
-const music = document.getElementById("music");
+const video =
+    document.getElementById("v");
 
 
-/* FONTS */
+/* =========================
+   MUSIC
+========================= */
 
-const fontRegular = new FontFace(
-    "BBCGill",
-    "url(GIL_____.TTF)"
-);
-
-const fontBold = new FontFace(
-    "BBCGillBold",
-    "url(GILB____.TTF)"
-);
+const music =
+    document.getElementById("music");
 
 
-/* BACKGROUND */
+/* =========================
+   FONTS
+========================= */
 
-const bgImg = new Image();
+const fontRegular =
+    new FontFace(
+        "BBCGill",
+        "url(GIL_____.TTF)"
+    );
 
-bgImg.src = "background.png";
+const fontBold =
+    new FontFace(
+        "BBCGillBold",
+        "url(GILB____.TTF)"
+    );
 
 
-/* SCREEN BUG */
+/* =========================
+   BACKGROUND
+========================= */
 
-const screenBugImg = new Image();
+const bgImg =
+    new Image();
 
-screenBugImg.src = "screenbug.png";
+bgImg.src =
+    "background.png";
 
 
-/* STORY VARIABLES */
+/* =========================
+   SCREEN BUG
+========================= */
+
+const screenBugImg =
+    new Image();
+
+screenBugImg.src =
+    "screenbug.png";
+
+
+/* =========================
+   STORY VARIABLES
+========================= */
 
 let currentDate = "";
 let currentTime = "";
@@ -331,46 +441,79 @@ let showVideo = true;
 let showScreenBug = false;
 
 
-/* UPDATE SCREEN */
+/* =========================
+   UPDATE SCREEN
+========================= */
 
 function updateScreen() {
 
     currentDate =
-        document.getElementById("dateInput").value;
+        document.getElementById(
+            "dateInput"
+        ).value;
+
 
     currentTime =
-        document.getElementById("timeInput").value;
+        document.getElementById(
+            "timeInput"
+        ).value;
+
 
     sectionHeading =
-        document.getElementById("headingInput").value;
+        document.getElementById(
+            "headingInput"
+        ).value;
+
 
     storyTitle =
-        document.getElementById("titleInput").value;
+        document.getElementById(
+            "titleInput"
+        ).value;
+
 
     storyText =
-        document.getElementById("storyInput").value;
+        document.getElementById(
+            "storyInput"
+        ).value;
+
 
     footerText =
-        document.getElementById("footerInput").value;
+        document.getElementById(
+            "footerInput"
+        ).value;
+
 
     showHeadline =
-        document.getElementById("showHeadline").checked;
+        document.getElementById(
+            "showHeadline"
+        ).checked;
+
 
     showVideo =
-        document.getElementById("showVideo").checked;
+        document.getElementById(
+            "showVideo"
+        ).checked;
+
 
     showScreenBug =
-        document.getElementById("showDOG").checked;
+        document.getElementById(
+            "showDOG"
+        ).checked;
 
 }
 
 
-/* MUSIC CONTROL */
+/* =========================
+   MUSIC CONTROL
+========================= */
 
 function updateMusic() {
 
     const enabled =
-        document.getElementById("playMusic").checked;
+        document.getElementById(
+            "playMusic"
+        ).checked;
+
 
     if (enabled) {
 
@@ -382,7 +525,9 @@ function updateMusic() {
 
         });
 
-    } else {
+    }
+
+    else {
 
         music.pause();
 
@@ -393,22 +538,29 @@ function updateMusic() {
 }
 
 
-/* VIDEO AUTOPLAY */
+/* =========================
+   VIDEO AUTOPLAY
+========================= */
 
-video.addEventListener("canplay", () => {
+video.addEventListener(
+    "canplay",
+    () => {
 
-    video.play().catch(() => {
+        video.play().catch(() => {
 
-        console.log(
-            "Autoplay blocked. Click the page to start the video."
-        );
+            console.log(
+                "Autoplay blocked. Click the page to start the video."
+            );
 
-    });
+        });
 
-});
+    }
+);
 
 
-/* TEXT WRAPPING */
+/* =========================
+   TEXT WRAPPING
+========================= */
 
 function wrapText(
     text,
@@ -418,7 +570,9 @@ function wrapText(
     lineHeight
 ) {
 
-    const lines = text.split("\n");
+    const lines =
+        text.split("\n");
+
 
     lines.forEach(line => {
 
@@ -430,9 +584,13 @@ function wrapText(
 
         }
 
-        const words = line.split(" ");
+
+        const words =
+            line.split(" ");
+
 
         let currentLine = "";
+
 
         for (
             let n = 0;
@@ -445,9 +603,11 @@ function wrapText(
                 words[n] +
                 " ";
 
+
             if (
-                ctx.measureText(testLine).width >
-                maxWidth &&
+                ctx.measureText(
+                    testLine
+                ).width > maxWidth &&
                 n > 0
             ) {
 
@@ -457,12 +617,16 @@ function wrapText(
                     y
                 );
 
+
                 currentLine =
                     words[n] + " ";
 
+
                 y += lineHeight;
 
-            } else {
+            }
+
+            else {
 
                 currentLine =
                     testLine;
@@ -471,11 +635,13 @@ function wrapText(
 
         }
 
+
         ctx.fillText(
             currentLine,
             x,
             y
         );
+
 
         y += lineHeight;
 
@@ -484,7 +650,9 @@ function wrapText(
 }
 
 
-/* DRAW SCREEN */
+/* =========================
+   DRAW SCREEN
+========================= */
 
 function loop() {
 
@@ -496,7 +664,9 @@ function loop() {
     );
 
 
-    /* VIDEO */
+    /* =====================
+       VIDEO
+    ===================== */
 
     if (showVideo) {
 
@@ -515,7 +685,9 @@ function loop() {
     }
 
 
-    /* STATIC BACKGROUND */
+    /* =====================
+       STATIC BACKGROUND
+    ===================== */
 
     if (
         bgImg.complete &&
@@ -533,16 +705,21 @@ function loop() {
     }
 
 
-    /* WHITE TEXT */
+    /* =====================
+       WHITE TEXT
+    ===================== */
 
     ctx.fillStyle =
         "#ffffff";
 
 
-    /* DATE — 57PX */
+    /* =====================
+       DATE
+    ===================== */
 
     ctx.font =
         "bold 57px BBCGillBold";
+
 
     ctx.fillText(
         currentDate,
@@ -551,10 +728,13 @@ function loop() {
     );
 
 
-    /* SECTION HEADING */
+    /* =====================
+       SECTION HEADING
+    ===================== */
 
     ctx.font =
         "bold 60px BBCGillBold";
+
 
     ctx.fillText(
         sectionHeading,
@@ -563,7 +743,9 @@ function loop() {
     );
 
 
-    /* STORY */
+    /* =====================
+       STORY
+    ===================== */
 
     ctx.font =
         "42px BBCGill";
@@ -578,6 +760,7 @@ function loop() {
             contentX,
             390
         );
+
 
         wrapText(
             storyText,
@@ -605,10 +788,13 @@ function loop() {
     }
 
 
-    /* FOOTER */
+    /* =====================
+       FOOTER
+    ===================== */
 
     ctx.font =
         "28px BBCGill";
+
 
     ctx.fillText(
         footerText,
@@ -617,13 +803,17 @@ function loop() {
     );
 
 
-    /* TIME */
+    /* =====================
+       TIME
+    ===================== */
 
     ctx.font =
         "bold 50px BBCGillBold";
 
+
     ctx.textAlign =
         "right";
+
 
     ctx.fillText(
         currentTime,
@@ -631,11 +821,14 @@ function loop() {
         902
     );
 
+
     ctx.textAlign =
         "left";
 
 
-    /* SCREEN BUG */
+    /* =====================
+       SCREEN BUG
+    ===================== */
 
     if (
         showScreenBug &&
@@ -654,12 +847,16 @@ function loop() {
     }
 
 
-    requestAnimationFrame(loop);
+    requestAnimationFrame(
+        loop
+    );
 
 }
 
 
-/* START */
+/* =========================
+   START
+========================= */
 
 async function init() {
 
@@ -671,11 +868,20 @@ async function init() {
                 fontBold.load()
             ]);
 
-        loadedFonts.forEach(font => {
-            document.fonts.add(font);
-        });
 
-    } catch (e) {
+        loadedFonts.forEach(
+            font => {
+
+                document.fonts.add(
+                    font
+                );
+
+            }
+        );
+
+    }
+
+    catch (e) {
 
         console.log(
             "Font loading failed."
@@ -686,19 +892,29 @@ async function init() {
 
     updateScreen();
 
-    video.play().catch(() => {});
 
-    requestAnimationFrame(loop);
+    video.play().catch(
+        () => {}
+    );
+
+
+    requestAnimationFrame(
+        loop
+    );
 
 }
 
 
-/* CLICK FALLBACK */
+/* =========================
+   CLICK FALLBACK
+========================= */
 
 window.onclick = () => {
 
     if (video.paused) {
+
         video.play();
+
     }
 
 };
