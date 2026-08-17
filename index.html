@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>BBC National Service - Manual Editor</title>
+
+<style>
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background: #000;
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    font-family: "Gill Sans", sans-serif;
+    overflow: hidden;
+    justify-content: center;
+    align-items: center;
+}
+
+.editor {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+    width: 300px;
+    background: rgba(0, 0, 0, 0.85);
+    padding: 18px;
+    border-radius: 8px;
+    border: 1px solid #444;
+    color: white;
+}
+
+.editor h2 {
+    margin: 0 0 15px 0;
+    font-size: 18px;
+}
+
+.editor label {
+    display: block;
+    color: #aaa;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.editor input,
+.editor textarea {
+    width: 100%;
+    box-sizing: border-box;
+    background: #111;
+    color: white;
+    border: 1px solid #555;
+    padding: 8px;
+    margin-bottom: 12px;
+    font-family: "Gill Sans", sans-serif;
+    font-size: 14px;
+}
+
+.editor textarea {
+    resize: vertical;
+    min-height: 150px;
+}
+
+.checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.checkbox-row input {
+    width: auto;
+    margin: 0;
+}
+
+.checkbox-row label {
+    margin: 0;
+    color: white;
+    font-size: 12px;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+#v {
+    display: none;
+}
+
+.frame {
+    width: min(100vw, calc(100vh * 4 / 3));
+    height: min(100vh, calc(100vw * 3 / 4));
+    aspect-ratio: 4 / 3;
+    position: relative;
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+    background: #000;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- HIDDEN VIDEO -->
+
+<video
+    id="v"
+    src="video.mp4"
+    loop
+    muted
+    autoplay
+    playsinline>
+</video>
+
+
+<!-- BACKGROUND MUSIC -->
+
+<audio
+    id="music"
+    src="music.mp3"
+    loop>
+</audio>
+
+
+<!-- EDITOR -->
+
+<div class="editor">
+
+    <h2>BBC National Service Editor</h2>
+
+    <label>Date</label>
+
+    <input
+        id="dateInput"
+        value="Wednesday 23rd July 2008"
+        oninput="updateScreen()">
+
+
+    <label>Time</label>
+
+    <input
+        id="timeInput"
+        value="01:28"
+        oninput="updateScreen()">
+
+
+    <label>Section Heading</label>
+
+    <input
+        id="headingInput"
+        value="NEWS REEL:"
+        oninput="updateScreen()">
+
+
+    <label>Story Headline</label>
+
+    <input
+        id="titleInput"
+        value="BBC NEWS HEADLINES"
+        oninput="updateScreen()">
+
+
+    <!-- STORY HEADLINE -->
+
+    <div class="checkbox-row">
+
+        <input
+            type="checkbox"
+            id="showHeadline"
+            onchange="updateScreen()">
+
+        <label for="showHeadline">
+            Show Story Headline
+        </label>
+
+    </div>
+
+
+    <!-- BACKGROUND VIDEO -->
+
+    <div class="checkbox-row">
+
+        <input
+            type="checkbox"
+            id="showVideo"
+            checked
+            onchange="updateScreen()">
+
+        <label for="showVideo">
+            Show Background Video
+        </label>
+
+    </div>
+
+
+    <!-- SCREEN BUG -->
+
+    <div class="checkbox-row">
+
+        <input
+            type="checkbox"
+            id="showDOG"
+            onchange="updateScreen()">
+
+        <label for="showDOG">
+            Show Screen Bug (DOG)
+        </label>
+
+    </div>
+
+
+    <!-- MUSIC -->
+
+    <div class="checkbox-row">
+
+        <input
+            type="checkbox"
+            id="playMusic"
+            onchange="updateMusic()">
+
+        <label for="playMusic">
+            Play Background Music
+        </label>
+
+    </div>
+
+
+    <label>Story</label>
+
+    <textarea
+        id="storyInput"
+        oninput="updateScreen()">P.M. Gordon Brown: "In this trying time, the utmost
+comfort of the Government is necessary."
+P.M. G. Brown gave this answer on his last known speech
+to the Nation, it is still unclear what happened to the P.M.
+at this time.
+
+FOR MORE INFORMATION: SEE CEEFAX OR BBC RED
+BUTTON.</textarea>
+
+
+    <label>Footer</label>
+
+    <input
+        id="footerInput"
+        value=""
+        oninput="updateScreen()">
+
+</div>
+
+
+<!-- TV SCREEN -->
+
+<div class="frame">
+
+    <canvas
+        id="c"
+        width="1440"
+        height="1080">
+    </canvas>
+
+</div>
+
+
+<script>
+
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
+
+const W = 1440;
+const H = 1080;
+
+const contentX = 125;
+
+
+/* VIDEO */
+
+const video = document.getElementById("v");
+
+
+/* MUSIC */
+
+const music = document.getElementById("music");
+
+
+/* FONTS */
+
+const fontRegular = new FontFace(
+    "BBCGill",
+    "url(GIL_____.TTF)"
+);
+
+const fontBold = new FontFace(
+    "BBCGillBold",
+    "url(GILB____.TTF)"
+);
+
+
+/* BACKGROUND */
+
+const bgImg = new Image();
+
+bgImg.src = "background.png";
+
+
+/* SCREEN BUG */
+
+const screenBugImg = new Image();
+
+screenBugImg.src = "screenbug.png";
+
+
+/* STORY VARIABLES */
+
+let currentDate = "";
+let currentTime = "";
+let sectionHeading = "";
+let storyTitle = "";
+let storyText = "";
+let footerText = "";
+
+let showHeadline = false;
+let showVideo = true;
+let showScreenBug = false;
+
+
+/* UPDATE SCREEN */
+
+function updateScreen() {
+
+    currentDate =
+        document.getElementById("dateInput").value;
+
+    currentTime =
+        document.getElementById("timeInput").value;
+
+    sectionHeading =
+        document.getElementById("headingInput").value;
+
+    storyTitle =
+        document.getElementById("titleInput").value;
+
+    storyText =
+        document.getElementById("storyInput").value;
+
+    footerText =
+        document.getElementById("footerInput").value;
+
+    showHeadline =
+        document.getElementById("showHeadline").checked;
+
+    showVideo =
+        document.getElementById("showVideo").checked;
+
+    showScreenBug =
+        document.getElementById("showDOG").checked;
+
+}
+
+
+/* MUSIC CONTROL */
+
+function updateMusic() {
+
+    const enabled =
+        document.getElementById("playMusic").checked;
+
+    if (enabled) {
+
+        music.play().catch(() => {
+
+            console.log(
+                "Music playback was blocked. Click the page to allow audio."
+            );
+
+        });
+
+    } else {
+
+        music.pause();
+
+        music.currentTime = 0;
+
+    }
+
+}
+
+
+/* VIDEO AUTOPLAY */
+
+video.addEventListener("canplay", () => {
+
+    video.play().catch(() => {
+
+        console.log(
+            "Autoplay blocked. Click the page to start the video."
+        );
+
+    });
+
+});
+
+
+/* TEXT WRAPPING */
+
+function wrapText(
+    text,
+    x,
+    y,
+    maxWidth,
+    lineHeight
+) {
+
+    const lines = text.split("\n");
+
+    lines.forEach(line => {
+
+        if (line.trim() === "") {
+
+            y += lineHeight / 2;
+
+            return;
+
+        }
+
+        const words = line.split(" ");
+
+        let currentLine = "";
+
+        for (
+            let n = 0;
+            n < words.length;
+            n++
+        ) {
+
+            const testLine =
+                currentLine +
+                words[n] +
+                " ";
+
+            if (
+                ctx.measureText(testLine).width >
+                maxWidth &&
+                n > 0
+            ) {
+
+                ctx.fillText(
+                    currentLine,
+                    x,
+                    y
+                );
+
+                currentLine =
+                    words[n] + " ";
+
+                y += lineHeight;
+
+            } else {
+
+                currentLine =
+                    testLine;
+
+            }
+
+        }
+
+        ctx.fillText(
+            currentLine,
+            x,
+            y
+        );
+
+        y += lineHeight;
+
+    });
+
+}
+
+
+/* DRAW SCREEN */
+
+function loop() {
+
+    ctx.clearRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+
+    /* VIDEO */
+
+    if (showVideo) {
+
+        if (video.readyState >= 2) {
+
+            ctx.drawImage(
+                video,
+                0,
+                0,
+                W,
+                H
+            );
+
+        }
+
+    }
+
+
+    /* STATIC BACKGROUND */
+
+    if (
+        bgImg.complete &&
+        bgImg.naturalWidth !== 0
+    ) {
+
+        ctx.drawImage(
+            bgImg,
+            0,
+            0,
+            W,
+            H
+        );
+
+    }
+
+
+    /* WHITE TEXT */
+
+    ctx.fillStyle =
+        "#ffffff";
+
+
+    /* DATE — 57PX */
+
+    ctx.font =
+        "bold 57px BBCGillBold";
+
+    ctx.fillText(
+        currentDate,
+        contentX,
+        205
+    );
+
+
+    /* SECTION HEADING */
+
+    ctx.font =
+        "bold 60px BBCGillBold";
+
+    ctx.fillText(
+        sectionHeading,
+        contentX,
+        320
+    );
+
+
+    /* STORY */
+
+    ctx.font =
+        "42px BBCGill";
+
+
+    /* HEADLINE ENABLED */
+
+    if (showHeadline) {
+
+        ctx.fillText(
+            storyTitle.toUpperCase(),
+            contentX,
+            390
+        );
+
+        wrapText(
+            storyText,
+            contentX,
+            442,
+            1190,
+            52
+        );
+
+    }
+
+
+    /* HEADLINE DISABLED */
+
+    else {
+
+        wrapText(
+            storyText,
+            contentX,
+            390,
+            1190,
+            52
+        );
+
+    }
+
+
+    /* FOOTER */
+
+    ctx.font =
+        "28px BBCGill";
+
+    ctx.fillText(
+        footerText,
+        contentX,
+        780
+    );
+
+
+    /* TIME */
+
+    ctx.font =
+        "bold 50px BBCGillBold";
+
+    ctx.textAlign =
+        "right";
+
+    ctx.fillText(
+        currentTime,
+        1315,
+        902
+    );
+
+    ctx.textAlign =
+        "left";
+
+
+    /* SCREEN BUG */
+
+    if (
+        showScreenBug &&
+        screenBugImg.complete &&
+        screenBugImg.naturalWidth !== 0
+    ) {
+
+        ctx.drawImage(
+            screenBugImg,
+            0,
+            0,
+            W,
+            H
+        );
+
+    }
+
+
+    requestAnimationFrame(loop);
+
+}
+
+
+/* START */
+
+async function init() {
+
+    try {
+
+        const loadedFonts =
+            await Promise.all([
+                fontRegular.load(),
+                fontBold.load()
+            ]);
+
+        loadedFonts.forEach(font => {
+            document.fonts.add(font);
+        });
+
+    } catch (e) {
+
+        console.log(
+            "Font loading failed."
+        );
+
+    }
+
+
+    updateScreen();
+
+    video.play().catch(() => {});
+
+    requestAnimationFrame(loop);
+
+}
+
+
+/* CLICK FALLBACK */
+
+window.onclick = () => {
+
+    if (video.paused) {
+        video.play();
+    }
+
+};
+
+
+init();
+
+</script>
+
+</body>
+</html>
